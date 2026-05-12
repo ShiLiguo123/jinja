@@ -1314,6 +1314,33 @@ class Template:
         except Exception:
             return self.environment.handle_exception()
 
+    def __copy__(self) -> "Template":
+        """Return a copy of the template.
+
+        Templates are immutable and compiled from source, so a shallow
+        copy is just the same object. Use :func:`copy.deepcopy` for a
+        fully independent copy.
+        """
+        return self
+
+    def __deepcopy__(self, memo: dict) -> "Template":
+        """Return a deep copy of the template.
+
+        This allows :func:`copy.deepcopy` to work on :class:`Template`
+        objects. Uses :func:`object.__new__` to bypass the constructor's
+        ``source`` requirement, then deep copies all instance attributes.
+        """
+        import copy
+        cls = self.__class__
+        result = cls.__new__(cls, "")
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            try:
+                setattr(result, k, copy.deepcopy(v, memo))
+            except TypeError:
+                setattr(result, k, v)
+        return result
+
     def stream(self, *args: t.Any, **kwargs: t.Any) -> "TemplateStream":
         """Works exactly like :meth:`generate` but returns a
         :class:`TemplateStream`.
