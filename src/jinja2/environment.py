@@ -1331,6 +1331,7 @@ class Template:
         ``source`` requirement, then deep copies all instance attributes.
         """
         import copy
+
         cls = self.__class__
         result = cls.__new__(cls, "")
         memo[id(self)] = result
